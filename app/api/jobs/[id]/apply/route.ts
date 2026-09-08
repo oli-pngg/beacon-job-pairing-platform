@@ -1,11 +1,14 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { calculateFitScore } from '@/lib/matching';
 import { getCandidateSkills } from '@/lib/server-data';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { Job } from '@/lib/types';
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const limited = checkRateLimit(_request, 'job-application-write', { limit: 15, windowMs: 60 * 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

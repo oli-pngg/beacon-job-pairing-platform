@@ -1,9 +1,12 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { cleanText, cleanUuidArray, jsonError, jsonOk, safeInteger } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { getVisibleJobs } from '@/lib/server-data';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export async function GET(request: Request) {
+  const limited = checkRateLimit(request, 'jobs-read', { limit: 120, windowMs: 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);
@@ -28,6 +31,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const limited = checkRateLimit(request, 'jobs-write', { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

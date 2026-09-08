@@ -10,12 +10,17 @@ export type Profile = {
   organization_name: string | null;
   headline: string | null;
   bio: string | null;
+  disability_description: string | null;
   location: string | null;
   work_mode: string;
   availability: string;
   years_experience: number;
   disability_types: string[];
   accessibility_needs: string[];
+  profile_photo_url: string | null;
+  profile_photo_alt: string | null;
+  profile_photo_path?: string | null;
+  profile_completed: boolean;
   created_at?: string;
   updated_at?: string;
 };

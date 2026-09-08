@@ -1,12 +1,15 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import type { CandidatePreview } from '@/lib/types';
 
 function candidateReference(candidateId: string) {
   return `Candidate ${candidateId.replace(/-/g, '').slice(0, 4).toUpperCase()}`;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limited = checkRateLimit(request, 'candidate-pool-read', { limit: 60, windowMs: 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

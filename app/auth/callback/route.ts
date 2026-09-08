@@ -8,5 +8,5 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
-  return NextResponse.redirect(new URL('/dashboard', requestUrl.origin));
+  return NextResponse.redirect(new URL('/auth/continue', requestUrl.origin));
 }

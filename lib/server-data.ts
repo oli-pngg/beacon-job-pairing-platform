@@ -55,7 +55,7 @@ export async function attachEmployerNames(jobs: Job[]) {
 
   const profiles = (data ?? []) as unknown as Array<{ id: string; organization_name: string | null }>;
   const names = new Map(profiles.map((profile) => [profile.id, profile.organization_name]));
-  return jobs.map((job) => ({ ...job, organization_name: names.get(job.employer_id) ?? 'Beacon employer' }));
+  return jobs.map((job) => ({ ...job, organization_name: names.get(job.employer_id) ?? 'PWD Connect employer' }));
 }
 
 export function one<T>(value: T | T[] | null | undefined) {

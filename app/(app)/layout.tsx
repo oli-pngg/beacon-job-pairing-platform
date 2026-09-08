@@ -5,7 +5,7 @@ import type { Profile } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const shellProfileSelect = 'id, email, role, full_name, organization_name, headline, bio, location, work_mode, availability, years_experience, accessibility_needs, created_at, updated_at';
+const shellProfileSelect = 'id, email, role, full_name, organization_name, headline, bio, disability_description, location, work_mode, availability, years_experience, disability_types, accessibility_needs, profile_photo_url, profile_photo_alt, profile_photo_path, profile_completed, created_at, updated_at';
 
 export default async function ProtectedLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { supabase, user } = await getAuthenticatedContext();
@@ -38,12 +38,16 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
       organization_name: null,
       headline: null,
       bio: null,
+      disability_description: null,
       location: 'Legazpi City, Albay',
       work_mode: 'Flexible',
       availability: 'Open to opportunities',
       years_experience: 0,
       disability_types: [],
-      accessibility_needs: []
+      accessibility_needs: [],
+      profile_photo_url: null,
+      profile_photo_alt: null,
+      profile_completed: false
     };
     return <AppShell profile={fallbackProfile}>{children}</AppShell>;
   }

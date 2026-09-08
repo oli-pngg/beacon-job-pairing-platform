@@ -1,9 +1,12 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const allowedStatuses = new Set(['submitted', 'shortlisted', 'interview', 'rejected', 'hired']);
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  const limited = checkRateLimit(request, 'application-status-write', { limit: 30, windowMs: 60 * 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

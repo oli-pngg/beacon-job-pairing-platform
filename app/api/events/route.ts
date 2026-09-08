@@ -1,9 +1,12 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { cleanText, jsonError, jsonOk, safeInteger } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const allowedEvents = new Set(['dashboard_load', 'jobs_load', 'assessment_load', 'profile_load']);
 
 export async function POST(request: Request) {
+  const limited = checkRateLimit(request, 'performance-event-write', { limit: 120, windowMs: 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

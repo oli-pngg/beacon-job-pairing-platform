@@ -6,5 +6,5 @@ export default function LoginPage() {
 }
 
 function AuthLoading() {
-  return <div className="auth-page"><div className="auth-aside" /><main className="auth-main"><div className="auth-card" role="status">Loading secure sign-in...</div></main></div>;
+  return <div className="auth-page"><div className="auth-aside" /><main className="auth-main" id="main-content"><div className="auth-card" role="status" aria-live="polite">Loading secure sign-in...</div></main></div>;
 }

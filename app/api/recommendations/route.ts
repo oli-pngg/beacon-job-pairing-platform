@@ -1,9 +1,12 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { rankJobs } from '@/lib/matching';
 import { getCandidateSkills, getVisibleJobs } from '@/lib/server-data';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limited = checkRateLimit(request, 'recommendations-read', { limit: 60, windowMs: 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

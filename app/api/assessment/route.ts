@@ -1,5 +1,6 @@
 import { getAuthenticatedContext } from '@/lib/auth';
 import { cleanText, jsonError, jsonOk } from '@/lib/http';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 function publicQuestions(data: Array<Record<string, unknown>>) {
@@ -13,7 +14,9 @@ function publicQuestions(data: Array<Record<string, unknown>>) {
   }));
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limited = checkRateLimit(request, 'assessment-read', { limit: 60, windowMs: 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);
@@ -29,6 +32,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const limited = checkRateLimit(request, 'assessment-write', { limit: 5, windowMs: 60 * 60 * 1000 });
+  if (!limited.allowed) return rateLimitResponse(limited.retryAfterSeconds);
   try {
     const { supabase, user } = await getAuthenticatedContext();
     if (!user) return jsonError('Authentication required.', 401);

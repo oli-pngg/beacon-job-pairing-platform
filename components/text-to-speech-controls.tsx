@@ -2,8 +2,10 @@
 
 import { Pause, Play, Square, Volume2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/components/language-provider';
 
 export function TextToSpeechControls() {
+  const { language } = useLanguage();
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [status, setStatus] = useState('');
@@ -29,7 +31,7 @@ export function TextToSpeechControls() {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    utterance.lang = language === 'tl' ? 'tl-PH' : 'en-US';
     utterance.rate = 0.95;
     utterance.pitch = 1;
     utterance.onstart = () => {
